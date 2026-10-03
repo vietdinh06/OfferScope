@@ -4,10 +4,11 @@ import {useDropzone} from 'react-dropzone'
 import { parseAdd, docAdd } from '../app/parse/actions'
 
 type pdfWithPreview = File & { preview: string };
+type ParsedOffer = Record<string, string | null | undefined>;
 
 function MyDropzone() {
     const [files, setFiles] = useState<pdfWithPreview[]>([]);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<ParsedOffer[] | string | null>(null);
 
     const OFFER_FIELDS = [
         { key: "company", label: "Company" },
@@ -60,10 +61,21 @@ function MyDropzone() {
                 method: 'POST',
                 body: formData
             });
-            
+
             const data = await res.json();
-            setResult(data.offers)
-            await parseAdd(data.offers)
+
+            if (!res.ok) {
+                throw new Error(data?.error ?? 'Failed to parse document')
+            }
+
+            const parsedOffers = Array.isArray(data.offers) ? (data.offers as ParsedOffer[]) : []
+            setResult(parsedOffers)
+
+            const existing = JSON.parse(localStorage.getItem('offerscope-offers') ?? '[]') as ParsedOffer[]
+            const next = [...existing, ...parsedOffers]
+            localStorage.setItem('offerscope-offers', JSON.stringify(next))
+
+            await parseAdd(parsedOffers)
         } catch (err) {
             setResult(String(err));
         }
