@@ -4,7 +4,7 @@ import Footer from "./Footer";
 import { forgot } from '../app/forgot-password/actions';
 import { useState } from 'react'
 
-function myFP() {
+function ForgotPassword() {
     const [email, setEmail] = useState("");
     return (
         <main className="min-h-screen flex flex-col">
@@ -42,4 +42,4 @@ function myFP() {
     )
 }
 
-export default myFP;
+export default ForgotPassword;

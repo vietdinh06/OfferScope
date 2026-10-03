@@ -4,7 +4,7 @@ import Footer from "./Footer";
 import { signup } from '../app/signup/actions';
 import { useState } from 'react'
 
-function mySignup() {
+function Signup() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
@@ -101,4 +101,4 @@ function mySignup() {
     )
 }
 
-export default mySignup;
+export default Signup;

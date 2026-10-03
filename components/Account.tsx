@@ -12,7 +12,10 @@ export default function AccountForm({ user }: { user: User | null }) {
 
   const getProfile = useCallback(async () => {
     try {
-      if (!user?.id) return;
+      if (!user?.id || !supabase) {
+        setLoading(false)
+        return
+      }
       setLoading(true)
 
       const { data, error, status } = await supabase
@@ -22,7 +25,7 @@ export default function AccountForm({ user }: { user: User | null }) {
         .single()
 
       if (error && status !== 406) {
-        console.log(error)
+        console.error(error)
         throw error
       }
 
@@ -30,11 +33,12 @@ export default function AccountForm({ user }: { user: User | null }) {
         setFullname(data.full_name)
       }
     } catch (error) {
+      console.error('Error loading user data!', error)
       alert('Error loading user data!')
     } finally {
       setLoading(false)
     }
-  }, [user, supabase])
+  }, [supabase, user])
 
   useEffect(() => {
     getProfile()
@@ -61,6 +65,10 @@ export default function AccountForm({ user }: { user: User | null }) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700"
               />
             </div>
+
+            {loading && (
+              <p className="text-sm text-gray-500">Loading profile…</p>
+            )}
             
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
