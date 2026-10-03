@@ -14,7 +14,6 @@
     "@tailwindcss/cli": "^4.1.18",
     "motion": "^12.34.0",
     "next": "16.1.6",
-    "openai": "^6.18.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-dropzone": "^14.4.0"
