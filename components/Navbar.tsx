@@ -3,24 +3,26 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { type User } from '@supabase/supabase-js';
-function myNav() {
+function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [user, setUser] = useState<User | null>(null);
     const supabase = createClient();
-    
+
     useEffect(() => {
-        // Get initial session
+        if (!supabase) {
+            return;
+        }
+
         supabase.auth.getUser().then(({ data: { user } }) => {
             setUser(user);
         });
 
-        // Listen for auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [supabase]);
 
     return(
          <header className="bg-[white]/75 backdrop-blur-md shadow-xs sticky top-0 z-50 font-mono">
@@ -75,4 +77,4 @@ function myNav() {
     )
 }
 
-export default myNav;
+export default Navbar;

@@ -17,6 +17,10 @@ type Offer = {
 export async function parseAdd(offers: Offer[]) {
   const supabase = await createClient()
 
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY to continue.')
+  }
+
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -48,6 +52,10 @@ export async function parseAdd(offers: Offer[]) {
 
 export async function docAdd(files: File[]) {
   const supabase = await createClient()
+
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY to continue.')
+  }
 
   const { data: { user } } = await supabase.auth.getUser()
 
