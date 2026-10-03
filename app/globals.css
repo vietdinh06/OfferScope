@@ -4,6 +4,112 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --ink: #172033;
+  --muted: #667085;
+  --paper: #f7f9fc;
+  --panel: #ffffff;
+  --line: #e4e9f2;
+  --primary: #4f46e5;
+  --primary-dark: #3730a3;
+  --accent: #14b8a6;
+  --danger: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  @apply min-h-screen bg-[#E4E4FB] font-mono;
+  @apply min-h-screen;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(99, 102, 241, 0.12), transparent 32rem),
+    radial-gradient(circle at 90% 12%, rgba(20, 184, 166, 0.1), transparent 28rem),
+    var(--paper);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+}
+
+::selection {
+  color: white;
+  background: var(--primary);
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen;
+  }
+
+  .surface {
+    @apply rounded-3xl border bg-white/85 shadow-xl backdrop-blur;
+    border-color: var(--line);
+  }
+
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.24em];
+    color: var(--primary);
+  }
+
+  .button-primary {
+    @apply inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold text-white transition duration-200;
+    background: linear-gradient(135deg, var(--primary), #7c3aed);
+    box-shadow: 0 12px 24px -12px rgba(79, 70, 229, 0.8);
+  }
+
+  .button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 28px -12px rgba(79, 70, 229, 0.9);
+  }
+
+  .button-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border bg-white px-5 py-3 font-semibold transition duration-200;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  .button-secondary:hover {
+    transform: translateY(-2px);
+    border-color: #c7d2fe;
+    background: #eef2ff;
+  }
+
+  .fade-up {
+    animation: fade-up 600ms cubic-bezier(.22, 1, .36, 1) both;
+  }
+
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .spinner {
+    @apply inline-block h-4 w-4 rounded-full border-2 border-white/40 border-t-white;
+    animation: spin 700ms linear infinite;
+  }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

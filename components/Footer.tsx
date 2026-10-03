@@ -1,15 +1,17 @@
 'use client'
 
-function myFooter() {
+function Footer() {
     return (
-        <footer className="bg-[#B7BBF5] py-5 px-6 mt-auto">
-            <div className="max-w-4xl mx-auto text-center">
-                <p className="font-semibold mb-4 text-lg">This tool provides informational summaries and comparisons only.</p>
-                <div className="text-gray-700">
+        <footer className="mt-auto border-t border-slate-200 bg-white/70 px-6 py-8">
+            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
+                <div>
+                    <p className="font-bold text-slate-900">Offer<span className="text-indigo-600">Scope</span></p>
+                    <p className="mt-1 text-sm text-slate-500">Clarity for your next career move.</p>
                 </div>
+                <p className="text-xs text-slate-500">Informational summaries only. Not financial or legal advice.</p>
             </div>
         </footer>
     )
 }
 
-export default myFooter;
+export default Footer;
