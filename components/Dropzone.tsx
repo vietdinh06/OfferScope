@@ -37,12 +37,16 @@ function MyDropzone() {
         }
     }, [])
     
-    const {getRootProps, getInputProps, isDragActive} = useDropzone({
+    const {getRootProps, getInputProps, isDragActive, fileRejections} = useDropzone({
         onDrop,
         accept: {'application/pdf': ['.pdf']},
         maxFiles: 2,
         multiple: true
     })
+
+    const rejectionMessage = fileRejections.length > 0
+        ? 'Only PDF files are accepted, with a maximum of two files.'
+        : null
 
     const removeFile = (name: string) => {
         setFiles(prev => {
@@ -57,9 +61,10 @@ function MyDropzone() {
         setIsProcessing(true)
         setError(null)
         try {
-            await docAdd(files)
+            const documentResult = await docAdd(files)
             const formData = new FormData();
             files.forEach(file => formData.append('files', file));
+            documentResult.jobs.forEach((job) => formData.append('jobIds', job.id))
 
             const res = await fetch('/api/parse', {
                 method: 'POST',
@@ -75,10 +80,6 @@ function MyDropzone() {
             const parsedOffers = Array.isArray(data.offers) ? (data.offers as ParsedOffer[]) : []
             setResult(parsedOffers)
 
-            const existing = JSON.parse(localStorage.getItem('offerscope-offers') ?? '[]') as ParsedOffer[]
-            const next = [...existing, ...parsedOffers]
-            localStorage.setItem('offerscope-offers', JSON.stringify(next))
-
             await parseAdd(parsedOffers)
         } catch (err) {
             const message = err instanceof Error ? err.message : 'We could not process this offer.'
@@ -90,10 +91,10 @@ function MyDropzone() {
 
     return (
         <form>
-            {error && (
+            {(error || rejectionMessage) && (
                 <div role="alert" className="mx-auto mb-5 flex w-3/4 items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-left text-red-800">
                     <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 font-bold">!</span>
-                    <div><p className="font-bold">We couldn&apos;t process that offer</p><p className="mt-1 text-sm text-red-700">{error}</p></div>
+                    <div><p className="font-bold">{error ? "We couldn't process that offer" : 'That file could not be added'}</p><p className="mt-1 text-sm text-red-700">{error ?? rejectionMessage}</p></div>
                 </div>
             )}
 
@@ -132,7 +133,7 @@ function MyDropzone() {
                 <button 
                 className="button-primary mt-5 disabled:cursor-not-allowed disabled:opacity-60"
                 type = "button" onClick={() => parsePdf(files)} disabled={isProcessing}>
-                    {isProcessing ? <><span className="spinner" /> Analyzing offers...</> : 'Analyze selected offers'}
+                    {isProcessing ? <><span className="spinner" /> Extracting and analyzing...</> : 'Analyze selected offers'}
                 </button>
             )}
 
