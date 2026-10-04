@@ -1,4 +1,5 @@
 import { extractText, getDocumentProxy } from "unpdf";
+import { createClient } from "@/lib/supabase/server";
 
 type OfferInfo = {
   company: string;
@@ -77,6 +78,9 @@ function isOfferInfo(value: unknown): value is OfferInfo {
 }
 
 export async function POST(request: Request) {
+  let activeJobIds: string[] = [];
+  let supabase: Awaited<ReturnType<typeof createClient>> = null;
+
   try {
     const apiKey = process.env.GEMINI_API_KEY;
 
@@ -90,6 +94,20 @@ export async function POST(request: Request) {
     const model = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
     const formData = await request.formData();
     const files = formData.getAll('files').filter(f => f instanceof File) as File[]
+    const jobIds = formData.getAll('jobIds').filter((value): value is string => typeof value === 'string')
+    activeJobIds = jobIds
+    supabase = await createClient()
+
+    if (files.length === 0) {
+      return Response.json({ error: 'Please upload at least one PDF offer letter.' }, { status: 400 })
+    }
+
+    if (supabase && jobIds.length > 0) {
+      await supabase
+        .from('processing_jobs')
+        .update({ status: 'processing', started_at: new Date().toISOString(), attempt_count: 1 })
+        .in('id', jobIds)
+    }
 
     const offers = await Promise.all(files.map(async (f) => {
       if (!f || !(f instanceof File)) {
@@ -159,12 +177,27 @@ ${limitDocumentText(text)}`;
     }))
 
 
-    return Response.json(
-      { offers }
-    );
+    if (supabase && jobIds.length > 0) {
+      await supabase
+        .from('processing_jobs')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .in('id', jobIds)
+    }
+
+    return Response.json({ offers });
 
   } catch (e) {
     console.error("API Error:", e);
+    if (supabase && activeJobIds.length > 0) {
+      await supabase
+        .from('processing_jobs')
+        .update({
+          status: 'failed',
+          error_message: e instanceof Error ? e.message : 'Unknown processing error',
+        })
+        .in('id', activeJobIds)
+    }
+
     return Response.json(
       {
         error: "Failed to process file",

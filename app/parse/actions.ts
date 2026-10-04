@@ -73,10 +73,30 @@ export async function docAdd(files: File[]) {
   const { data, error } = await supabase
     .from('documents')
     .insert(doc)
+    .select('id, file_name')
 
   if (error) {
     throw new Error(error.message)
   }
 
-  return data;
+  const documents = data ?? []
+  const jobs = await Promise.all(documents.map(async (document) => {
+    const { data: job, error: jobError } = await supabase
+      .from('processing_jobs')
+      .insert({
+        user_id: user.id,
+        document_id: document.id,
+        status: 'queued',
+      })
+      .select('id, document_id')
+      .single()
+
+    if (jobError) {
+      throw new Error(`Unable to create processing job: ${jobError.message}`)
+    }
+
+    return job
+  }))
+
+  return { documents, jobs };
 }

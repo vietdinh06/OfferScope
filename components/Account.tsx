@@ -41,7 +41,11 @@ export default function AccountForm({ user }: { user: User | null }) {
   }, [supabase, user])
 
   useEffect(() => {
-    getProfile()
+    const task = window.setTimeout(() => {
+      void getProfile()
+    }, 0)
+
+    return () => window.clearTimeout(task)
   }, [user, getProfile])
 
   return (
